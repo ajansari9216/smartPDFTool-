@@ -1,0 +1,729 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text & Document Tools - SmartPDFTool</title>
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --white-color: #ffffff;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --ins-color: #d4edda;
+            --del-color: #f8d7da;
+        }
+
+        /* --- General Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        /* --- Header --- */
+        .main-header {
+            background-color: var(--white-color);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px var(--shadow-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .main-header h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        .btn-home {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            text-decoration: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-home:hover {
+            background-color: #0056b3;
+        }
+
+        /* --- Tool Grid Section --- */
+        #tool-grid-section .container {
+            text-align: center;
+        }
+
+        #tool-grid-section h2 {
+            margin-bottom: 0.5rem;
+            font-size: 2.5rem;
+        }
+
+        #tool-grid-section p {
+            color: var(--secondary-color);
+            max-width: 600px;
+            margin: 0 auto 3rem auto;
+            font-size: 1.1rem;
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tool-card {
+            background: var(--white-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px var(--shadow-color);
+        }
+
+        .tool-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-card p {
+            font-size: 0.95rem;
+            color: var(--secondary-color);
+            margin: 0;
+        }
+        
+        /* --- Active Tool Section --- */
+        #tool-container-section {
+            display: none;
+        }
+        
+        .tool-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .tool-header h2 {
+            font-size: 2.2rem;
+        }
+        
+        .tool-header p {
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .tool-workspace {
+            background-color: var(--white-color);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px var(--shadow-color);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        
+        /* --- General Tool UI Elements --- */
+        textarea.form-control, 
+        input.form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        textarea.form-control {
+            resize: vertical;
+        }
+        
+        .tool-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .btn:hover {
+            background-color: #0069d9;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .io-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .io-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        /* Specific Tool Styles */
+        #diff-checker-output {
+            white-space: pre-wrap;
+            font-family: monospace;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 6px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #diff-checker-output ins {
+            background-color: var(--ins-color);
+            text-decoration: none;
+        }
+        #diff-checker-output del {
+            background-color: var(--del-color);
+            text-decoration: line-through;
+        }
+        
+        #keyword-density-results table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        #keyword-density-results th, #keyword-density-results td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            text-align: left;
+        }
+        #keyword-density-results th {
+            background-color: var(--light-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>Text & Document Tools</h1>
+        <a href="index.html" class="btn-home">Back to Home</a>
+    </header>
+
+    <main>
+        <!-- Section for the tool selection grid -->
+        <section id="tool-grid-section">
+            <div class="container">
+                <h2>A Suite of Powerful Text Utilities</h2>
+                <p>Perform a wide range of text and document operations right in your browser. All tools work entirely on your device, ensuring your data remains private and secure. Select a tool to get started.</p>
+                <div class="tool-grid" id="tool-grid">
+                    <!-- Tool cards will be dynamically inserted here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Section for the active tool's workspace -->
+        <section id="tool-container-section">
+            <div class="container">
+                <span class="btn-back" id="back-to-tools-btn">&larr; Back to All Tools</span>
+                <div id="active-tool-placeholder">
+                    <!-- The selected tool's HTML will be injected here -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const toolGridSection = document.getElementById('tool-grid-section');
+    const toolContainerSection = document.getElementById('tool-container-section');
+    const toolGrid = document.getElementById('tool-grid');
+    const activeToolPlaceholder = document.getElementById('active-tool-placeholder');
+    const backToToolsBtn = document.getElementById('back-to-tools-btn');
+
+    // --- Tool Definitions ---
+    const tools = {
+        'word-counter': {
+            name: 'Word Counter',
+            description: 'Count words, characters, sentences, and paragraphs in your text.',
+            init: () => {
+                const input = document.getElementById('wc-input');
+                const wordsEl = document.getElementById('wc-words');
+                const charsEl = document.getElementById('wc-chars');
+                const sentencesEl = document.getElementById('wc-sentences');
+                
+                input.addEventListener('input', () => {
+                    const text = input.value;
+                    const words = text.trim().split(/\s+/).filter(Boolean).length;
+                    const chars = text.length;
+                    const sentences = (text.match(/[^\.!\?]+[\.!\?]+/g) || []).length;
+                    
+                    wordsEl.textContent = words;
+                    charsEl.textContent = chars;
+                    sentencesEl.textContent = sentences;
+                });
+            }
+        },
+        'character-counter': {
+            name: 'Character Counter',
+            description: 'Get a real-time count of characters as you type.',
+            init: () => {
+                const input = document.getElementById('cc-input');
+                const countEl = document.getElementById('cc-count');
+                input.addEventListener('input', () => {
+                    countEl.textContent = input.value.length;
+                });
+            }
+        },
+        'case-converter': {
+            name: 'Case Converter',
+            description: 'Convert text to UPPERCASE, lowercase, Title Case, and more.',
+            init: () => {
+                const input = document.getElementById('case-input');
+                document.getElementById('case-upper').addEventListener('click', () => input.value = input.value.toUpperCase());
+                document.getElementById('case-lower').addEventListener('click', () => input.value = input.value.toLowerCase());
+                document.getElementById('case-title').addEventListener('click', () => {
+                    input.value = input.value.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+                });
+            }
+        },
+        'summarizer': {
+            name: 'Text Summarizer',
+            description: 'A basic summarizer that shortens text by keeping the first few sentences.',
+            init: () => {
+                document.getElementById('summarize-btn').addEventListener('click', () => {
+                    const text = document.getElementById('summarizer-input').value;
+                    const output = document.getElementById('summarizer-output');
+                    const sentences = text.match(/[^\.!\?]+[\.!\?]+/g) || [];
+                    const summaryLength = Math.max(1, Math.ceil(sentences.length * 0.3)); // Keep ~30%
+                    output.value = sentences.slice(0, summaryLength).join(' ');
+                });
+            }
+        },
+        'grammar-checker': {
+            name: 'Grammar Checker',
+            description: 'A simple rule-based checker for common English mistakes.',
+            init: () => {
+                document.getElementById('grammar-check-btn').addEventListener('click', () => {
+                    const text = document.getElementById('grammar-input').value;
+                    const resultsEl = document.getElementById('grammar-results');
+                    resultsEl.innerHTML = '';
+                    let findings = [];
+                    // Rule 1: double spaces
+                    if (text.match(/ {2,}/)) {
+                        findings.push('Found double spaces. Consider using a single space.');
+                    }
+                    // Rule 2: common typo "teh"
+                    if (text.match(/\bteh\b/gi)) {
+                        findings.push('Found "teh". Did you mean "the"?');
+                    }
+                     // Rule 3: lowercase "i"
+                    if (text.match(/\bi\b/g)) {
+                        findings.push('Found lowercase "i". Personal pronoun "I" should be capitalized.');
+                    }
+                    if (findings.length > 0) {
+                        resultsEl.innerHTML = `<ul>${findings.map(f => `<li>${f}</li>`).join('')}</ul>`;
+                    } else {
+                        resultsEl.innerHTML = '<p style="color: green;">Looks good! No simple errors found.</p>';
+                    }
+                });
+            }
+        },
+        'find-replace': {
+            name: 'Find & Replace',
+            description: 'Quickly find and replace words or phrases in your text.',
+            init: () => {
+                document.getElementById('fr-replace-btn').addEventListener('click', () => {
+                    const textInput = document.getElementById('fr-text');
+                    const findInput = document.getElementById('fr-find');
+                    const replaceInput = document.getElementById('fr-replace');
+                    
+                    if (findInput.value) {
+                         textInput.value = textInput.value.replaceAll(findInput.value, replaceInput.value);
+                    }
+                });
+            }
+        },
+        'remove-duplicates': {
+            name: 'Remove Duplicate Lines',
+            description: 'Delete duplicate lines from a list, leaving only unique entries.',
+            init: () => {
+                document.getElementById('rd-btn').addEventListener('click', () => {
+                    const input = document.getElementById('rd-input');
+                    const lines = input.value.split('\n');
+                    const uniqueLines = [...new Set(lines)];
+                    input.value = uniqueLines.join('\n');
+                });
+            }
+        },
+        'sort-lines': {
+            name: 'Sort Lines Alphabetically',
+            description: 'Organize lines of text in alphabetical (A-Z) or reverse order (Z-A).',
+            init: () => {
+                const input = document.getElementById('sl-input');
+                document.getElementById('sl-az').addEventListener('click', () => {
+                    input.value = input.value.split('\n').sort().join('\n');
+                });
+                document.getElementById('sl-za').addEventListener('click', () => {
+                    input.value = input.value.split('\n').sort().reverse().join('\n');
+                });
+            }
+        },
+        'paragraph-formatter': {
+            name: 'Paragraph Formatter',
+            description: 'Clean up text by removing extra spaces and normalizing line breaks.',
+            init: () => {
+                document.getElementById('pf-btn').addEventListener('click', () => {
+                    const input = document.getElementById('pf-input');
+                    let text = input.value;
+                    // Replace multiple spaces with a single space
+                    text = text.replace(/ +/g, ' ');
+                    // Normalize newlines, ensuring paragraphs are separated by one blank line
+                    text = text.replace(/\n\s*\n/g, '\n\n');
+                    input.value = text.trim();
+                });
+            }
+        },
+        'text-cleaner': {
+            name: 'Text Cleaner',
+            description: 'Remove extra spaces, tabs, and special characters from your text.',
+            init: () => {
+                document.getElementById('tc-btn').addEventListener('click', () => {
+                    const input = document.getElementById('tc-input');
+                    let text = input.value;
+                    text = text.replace(/[ \t]+/g, ' '); // remove extra spaces and tabs
+                    text = text.replace(/\n\s*\n/g, '\n\n'); // normalize line breaks
+                    text = text.replace(/[^a-zA-Z0-9 \n\r.,!?'"-]/g, ''); // remove special characters
+                    input.value = text.trim();
+                });
+            }
+        },
+        'lorem-ipsum': {
+            name: 'Lorem Ipsum Generator',
+            description: 'Generate placeholder text for your design mockups.',
+            init: () => {
+                const lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+                document.getElementById('li-btn').addEventListener('click', () => {
+                    const count = document.getElementById('li-count').value;
+                    const output = document.getElementById('li-output');
+                    let result = [];
+                    for(let i=0; i<count; i++) {
+                        result.push(lorem);
+                    }
+                    output.value = result.join('\n\n');
+                });
+            }
+        },
+        'sentence-counter': {
+            name: 'Sentence Counter',
+            description: 'Count the total number of sentences in a block of text.',
+             init: () => {
+                const input = document.getElementById('sc-input');
+                const countEl = document.getElementById('sc-count');
+                input.addEventListener('input', () => {
+                    const text = input.value.trim();
+                    const sentences = text ? (text.match(/[^\.!\?]+[\.!\?]+/g) || []).length : 0;
+                    countEl.textContent = sentences;
+                });
+            }
+        },
+        'keyword-density': {
+            name: 'Keyword Density Checker',
+            description: 'Analyze text to find the frequency of specific keywords.',
+            init: () => {
+                document.getElementById('kd-btn').addEventListener('click', () => {
+                    const text = document.getElementById('kd-text').value.toLowerCase();
+                    const keywordsStr = document.getElementById('kd-keywords').value.toLowerCase();
+                    const resultsEl = document.getElementById('keyword-density-results');
+                    const tableBody = resultsEl.querySelector('tbody');
+
+                    tableBody.innerHTML = '';
+                    if (!text || !keywordsStr) return;
+
+                    const totalWords = text.split(/\s+/).filter(Boolean).length;
+                    const keywords = keywordsStr.split(',').map(k => k.trim()).filter(Boolean);
+
+                    keywords.forEach(keyword => {
+                        const count = (text.match(new RegExp(`\\b${keyword}\\b`, 'g')) || []).length;
+                        const density = totalWords > 0 ? ((count / totalWords) * 100).toFixed(2) : 0;
+                        const row = `<tr><td>${keyword}</td><td>${count}</td><td>${density}%</td></tr>`;
+                        tableBody.innerHTML += row;
+                    });
+                    resultsEl.style.display = 'block';
+                });
+            }
+        },
+        'emoji-remover': {
+            name: 'Emoji Remover',
+            description: 'Strip all emojis and symbols from your text.',
+            init: () => {
+                document.getElementById('er-btn').addEventListener('click', () => {
+                    const input = document.getElementById('er-input');
+                    const emojiRegex = /[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F700}-\u{1F77F}\u{1F780}-\u{1F7FF}\u{1F800}-\u{1F8FF}\u{1F900}-\u{1F9FF}\u{1FA00}-\u{1FA6F}\u{1FA70}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2B50}]+/gu;
+                    input.value = input.value.replace(emojiRegex, '');
+                });
+            }
+        },
+        'diff-checker': {
+            name: 'Text Difference Checker',
+            description: 'Compare two blocks of text and highlight the differences.',
+            init: () => {
+                document.getElementById('dc-btn').addEventListener('click', () => {
+                    const text1 = document.getElementById('dc-input1').value.split('\n');
+                    const text2 = document.getElementById('dc-input2').value.split('\n');
+                    const output = document.getElementById('diff-checker-output');
+                    
+                    const maxLen = Math.max(text1.length, text2.length);
+                    let resultHtml = '';
+
+                    for (let i = 0; i < maxLen; i++) {
+                        const line1 = text1[i] || '';
+                        const line2 = text2[i] || '';
+
+                        if (line1 === line2) {
+                            resultHtml += line1 + '\n';
+                        } else {
+                            if (text1.includes(line2) && line2 !== '') {
+                                 resultHtml += line1 + '\n';
+                            } else {
+                                if (line1) resultHtml += `<del>${line1}</del>\n`;
+                                if (line2) resultHtml += `<ins>${line2}</ins>\n`;
+                            }
+                        }
+                    }
+                    output.innerHTML = resultHtml;
+                    document.getElementById('diff-results-container').style.display = 'block';
+                });
+            }
+        },
+    };
+
+    // --- Generate Tool HTML Templates ---
+    const getToolHtml = (key) => {
+        const tool = tools[key];
+        let html = `
+            <div class="tool-header">
+                <h2>${tool.name}</h2>
+                <p>${tool.description}</p>
+            </div>
+            <div class="tool-workspace">`;
+
+        switch (key) {
+            case 'word-counter':
+                html += `
+                    <textarea id="wc-input" class="form-control" rows="8" placeholder="Paste your text here..."></textarea>
+                    <div style="display:flex; gap: 1rem; margin-top: 1rem;">
+                        <strong>Words: <span id="wc-words">0</span></strong>
+                        <strong>Characters: <span id="wc-chars">0</span></strong>
+                        <strong>Sentences: <span id="wc-sentences">0</span></strong>
+                    </div>`;
+                break;
+            case 'character-counter':
+                 html += `
+                    <textarea id="cc-input" class="form-control" rows="8" placeholder="Paste your text here..."></textarea>
+                    <div style="margin-top: 1rem;">
+                        <strong>Character Count: <span id="cc-count">0</span></strong>
+                    </div>`;
+                break;
+            case 'case-converter':
+                html += `
+                    <textarea id="case-input" class="form-control" rows="8" placeholder="Paste your text..."></textarea>
+                    <div class="tool-actions">
+                        <button id="case-upper" class="btn">UPPERCASE</button>
+                        <button id="case-lower" class="btn">lowercase</button>
+                        <button id="case-title" class="btn">Title Case</button>
+                    </div>`;
+                break;
+            case 'summarizer':
+                html += `
+                    <div class="io-grid">
+                        <div>
+                            <label>Full Text</label>
+                            <textarea id="summarizer-input" class="form-control" rows="10" placeholder="Paste the text to summarize..."></textarea>
+                        </div>
+                        <div>
+                            <label>Basic Summary</label>
+                            <textarea id="summarizer-output" class="form-control" rows="10" readonly placeholder="Summary will appear here..."></textarea>
+                        </div>
+                    </div>
+                    <div class="tool-actions">
+                        <button id="summarize-btn" class="btn">Summarize</button>
+                    </div>`;
+                break;
+            case 'grammar-checker':
+                html += `
+                    <textarea id="grammar-input" class="form-control" rows="8" placeholder="Paste your text to check..."></textarea>
+                     <div class="tool-actions">
+                        <button id="grammar-check-btn" class="btn">Check Grammar</button>
+                    </div>
+                    <div id="grammar-results" style="margin-top: 1rem;"></div>`;
+                break;
+            case 'find-replace':
+                html += `
+                    <textarea id="fr-text" class="form-control" rows="8" placeholder="Paste your text here..."></textarea>
+                    <div class="io-grid">
+                        <input id="fr-find" type="text" class="form-control" placeholder="Find this...">
+                        <input id="fr-replace" type="text" class="form-control" placeholder="Replace with this...">
+                    </div>
+                    <div class="tool-actions">
+                        <button id="fr-replace-btn" class="btn">Replace All</button>
+                    </div>`;
+                break;
+            case 'remove-duplicates':
+            case 'sort-lines':
+            case 'paragraph-formatter':
+            case 'text-cleaner':
+            case 'emoji-remover':
+                let placeholder = 'Paste your list here, one item per line...';
+                if(key === 'paragraph-formatter') placeholder = 'Paste your messy text here...';
+                
+                html += `<textarea id="${key.substring(0,2)}-input" class="form-control" rows="10" placeholder="${placeholder}"></textarea>`;
+                if (key === 'sort-lines') {
+                    html += `<div class="tool-actions">
+                        <button id="sl-az" class="btn">Sort A-Z</button>
+                        <button id="sl-za" class="btn">Sort Z-A</button>
+                    </div>`;
+                } else {
+                     html += `<div class="tool-actions">
+                        <button id="${key.substring(0,2)}-btn" class="btn">${tool.name}</button>
+                    </div>`;
+                }
+                break;
+            case 'lorem-ipsum':
+                html += `
+                    <label>Number of paragraphs:</label>
+                    <input id="li-count" type="number" class="form-control" value="3" min="1" max="50" style="max-width: 150px; margin-bottom: 1rem;">
+                    <div class="tool-actions">
+                        <button id="li-btn" class="btn">Generate</button>
+                    </div>
+                    <textarea id="li-output" class="form-control" rows="10" readonly placeholder="Generated text will appear here..." style="margin-top: 1rem;"></textarea>`;
+                break;
+            case 'sentence-counter':
+                 html += `
+                    <textarea id="sc-input" class="form-control" rows="8" placeholder="Paste your text here..."></textarea>
+                    <div style="margin-top: 1rem;">
+                        <strong>Sentence Count: <span id="sc-count">0</span></strong>
+                    </div>`;
+                break;
+            case 'keyword-density':
+                 html += `
+                    <textarea id="kd-text" class="form-control" rows="8" placeholder="Paste your main text here..."></textarea>
+                    <input id="kd-keywords" type="text" class="form-control" placeholder="Enter keywords, separated by commas">
+                    <div class="tool-actions">
+                        <button id="kd-btn" class="btn">Check Density</button>
+                    </div>
+                    <div id="keyword-density-results" style="display:none; margin-top: 1.5rem;">
+                         <table><thead><tr><th>Keyword</th><th>Count</th><th>Density</th></tr></thead><tbody></tbody></table>
+                    </div>`;
+                break;
+             case 'diff-checker':
+                html += `
+                    <div class="io-grid">
+                        <textarea id="dc-input1" class="form-control" rows="10" placeholder="Paste original text here..."></textarea>
+                        <textarea id="dc-input2" class="form-control" rows="10" placeholder="Paste modified text here..."></textarea>
+                    </div>
+                    <div class="tool-actions">
+                        <button id="dc-btn" class="btn">Compare</button>
+                    </div>
+                    <div id="diff-results-container" style="display:none; margin-top: 1.5rem;">
+                        <label>Differences:</label>
+                        <div id="diff-checker-output"></div>
+                    </div>
+                `;
+                break;
+        }
+
+        html += `</div>`; // Close .tool-workspace
+        return html;
+    };
+
+
+    // --- Navigation Logic ---
+    const showTool = (toolKey) => {
+        toolGridSection.style.display = 'none';
+        activeToolPlaceholder.innerHTML = getToolHtml(toolKey);
+        toolContainerSection.style.display = 'block';
+        window.scrollTo(0, 0);
+        // Initialize the tool's specific JavaScript
+        if (tools[toolKey] && typeof tools[toolKey].init === 'function') {
+            tools[toolKey].init();
+        }
+    };
+
+    const showGrid = () => {
+        toolContainerSection.style.display = 'none';
+        activeToolPlaceholder.innerHTML = '';
+        toolGridSection.style.display = 'block';
+    };
+
+    // Populate the tool grid on page load
+    Object.keys(tools).forEach(key => {
+        const tool = tools[key];
+        const card = document.createElement('div');
+        card.className = 'tool-card';
+        card.dataset.tool = key;
+        card.innerHTML = `
+            <h3>${tool.name}</h3>
+            <p>${tool.description}</p>
+        `;
+        toolGrid.appendChild(card);
+    });
+
+    // Add event listeners
+    toolGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('.tool-card');
+        if (card && card.dataset.tool) {
+            showTool(card.dataset.tool);
+        }
+    });
+
+    backToToolsBtn.addEventListener('click', showGrid);
+});
+</script>
+</body>
+</html>
